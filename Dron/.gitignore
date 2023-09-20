@@ -43,3 +43,11 @@ Saved/Config/Mac/
 Icon?
 ehthumbs.db
 Thumbs.db
+.idea
+.vs
+.vscode
+Content
+DerivedDataCache
+Intermediate
+Saved
+Script
