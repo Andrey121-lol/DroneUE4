@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "E_AnimDrone.h"
+#include "A_Projectile.h"
 #include "DroneBasePw.generated.h"
 
 UCLASS()
@@ -29,6 +31,10 @@ public:
 	// Box component that will contain the static mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UBoxComponent* Box;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UBoxComponent* Box2;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UBoxComponent* Box3;
 
 	// Static mesh component that will represent the drone
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -41,6 +47,12 @@ public:
 	// Camera component that will provide the view for the player
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UCameraComponent* Camera;
+
+	// Объявление переменной типа Class Reference с именем ProjectileClass
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Var")
+	TSubclassOf<AA_Projectile> ProjectileClass;
+
+
 
 	// Floating pawn movement component that will provide simple movement for the pawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -58,6 +70,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
 	int FullAmo=200;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Var")
+	E_AnimDrone AnimDrone;
+
+	bool CanShoot=true;
+	
+	FTimerHandle MemberTimerHandle;
 	
 
 
@@ -72,5 +90,9 @@ public:
 	void LookRightF(float Value);
 	void LookUpF(float Value);
 
+	//attack
+	void AttackFPres();
+	void Fire();
+	void AttackFReleas();
 
 };

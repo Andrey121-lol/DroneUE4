@@ -17,11 +17,16 @@ ADroneBasePw::ADroneBasePw()
 	
 	// Create and attach the box component
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	Box2 = CreateDefaultSubobject<UBoxComponent>(TEXT("Box2"));
+	Box3 = CreateDefaultSubobject<UBoxComponent>(TEXT("Box3"));
 	RootComponent = Box;
+	
 
 	// Create and attach the static mesh component
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Box);
+	Box2->SetupAttachment(Mesh);
+	Box3->SetupAttachment(Mesh);
 
 	// Create and attach the spring arm component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -34,7 +39,7 @@ ADroneBasePw::ADroneBasePw()
 	// Create and attach the floating pawn movement component
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	FloatingPawnMovement->UpdatedComponent = RootComponent;
-
+	
 
 }
 
@@ -42,7 +47,7 @@ ADroneBasePw::ADroneBasePw()
 void ADroneBasePw::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	float Angle = 0;
 }
 
 // Called every frame
@@ -50,12 +55,40 @@ void ADroneBasePw::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	
+	if(AnimDrone==E_AnimDrone::Idle)
+	{
+		FVector NewLocation = GetActorLocation();
+		FRotator NewRotation = GetActorRotation();
+		float RunningTime = GetGameTimeSinceCreation();
+		float DeltaHeight = (FMath::Sin(RunningTime + DeltaTime) - FMath::Sin(RunningTime));
+		NewLocation.Z += DeltaHeight * 10.0f;      
+		SetActorLocation(NewLocation);
+	}
+
+	switch (AnimDrone)
+	{
+	case E_AnimDrone::Forward:
+		Mesh->SetRelativeRotation(FRotator(0,90,0));
+		break;
+	case E_AnimDrone::Backward:
+		Mesh->SetRelativeRotation(FRotator(0,90,15));
+		break;
+	case E_AnimDrone::Right:
+		Mesh->SetRelativeRotation(FRotator(-15,90,0));
+		break;
+	case E_AnimDrone::Left:
+		Mesh->SetRelativeRotation(FRotator(15,90,0));
+		break;
+	case E_AnimDrone::Idle:
+		Mesh->SetRelativeRotation(FRotator(0,90,0));
+		break;
+	}
+	
+		
+
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//movement
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 // Called to bind functionality to input
 void ADroneBasePw::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -68,17 +101,46 @@ void ADroneBasePw::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis("MoveUp",this,&ADroneBasePw::MoveUpF);
 	PlayerInputComponent->BindAxis("LookUp",this,&ADroneBasePw::LookUpF);
 	PlayerInputComponent->BindAxis("LookRight",this,&ADroneBasePw::LookRightF);
+
+	PlayerInputComponent->BindAction("Attack",IE_Pressed,this,&ADroneBasePw::AttackFPres);
+	PlayerInputComponent->BindAction("Attack",IE_Released,this,&ADroneBasePw::AttackFReleas);
 	
 }
 
 void ADroneBasePw::MoveForwardF(float Value)
 {
 	FloatingPawnMovement->AddInputVector(GetActorForwardVector()*Value);
-
+	
+	if(Value>0)
+	{
+		AnimDrone=E_AnimDrone::Forward;
+	}
+	else if (Value<0)
+	{
+		AnimDrone=E_AnimDrone::Backward;
+	}
+	else if (Value == 0)
+	{
+		AnimDrone=E_AnimDrone::Idle;
+	}
 }
 void ADroneBasePw::MoveRightF(float Value)
 {
 	FloatingPawnMovement->AddInputVector(GetActorRightVector()*Value);
+	
+	if(Value>0)
+	{
+		AnimDrone=E_AnimDrone::Right;
+		
+	}
+	else if (Value<0)
+	{
+		AnimDrone=E_AnimDrone::Left;
+	}
+	/*else if (Value == 0)
+	{
+		AnimDrone=E_AnimDrone::Idle;
+	}*/
 
 }
 void ADroneBasePw::MoveUpF(float Value)
@@ -91,7 +153,32 @@ void ADroneBasePw::LookUpF(float Value)
 {
 	AddControllerPitchInput(Value);
 }
+
 void ADroneBasePw::LookRightF(float Value)
 {
 	AddControllerYawInput(Value);
 }
+
+void ADroneBasePw::AttackFPres()
+{
+	if (CanShoot)
+	{
+		GetWorldTimerManager().SetTimer(MemberTimerHandle, this, &ADroneBasePw::Fire, 0.1f, true, 0.1f);
+
+	}
+}
+
+void ADroneBasePw::Fire()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Ваше сообщение здесь"));
+	AA_Projectile* SpawnP = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box2->GetComponentTransform());
+	AA_Projectile* SpawnP2 = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box3->GetComponentTransform());
+
+}
+
+void ADroneBasePw::AttackFReleas()
+{
+	GetWorldTimerManager().ClearTimer(MemberTimerHandle);
+
+}
+
