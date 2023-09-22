@@ -2,6 +2,7 @@
 
 
 #include "DroneBasePw.h"
+#include "GameOverOrWin_I.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
@@ -60,7 +61,6 @@ void ADroneBasePw::Tick(float DeltaTime)
 	if(AnimDrone==E_AnimDrone::Idle)
 	{
 		FVector NewLocation = GetActorLocation();
-		FRotator NewRotation = GetActorRotation();
 		float RunningTime = GetGameTimeSinceCreation();
 		float DeltaHeight = (FMath::Sin(RunningTime + DeltaTime) - FMath::Sin(RunningTime));
 		NewLocation.Z += DeltaHeight * 10.0f;      
@@ -180,5 +180,29 @@ void ADroneBasePw::AttackFReleas()
 {
 	GetWorldTimerManager().ClearTimer(MemberTimerHandle);
 
+}
+
+void ADroneBasePw::Dead()
+{
+	IGameOverOrWin_I* InterfaceImplementer = Cast<IGameOverOrWin_I>(this);
+
+	if (InterfaceImplementer)
+	{
+		InterfaceImplementer->Execute_GameOverF(this);
+	}
+
+}
+
+void ADroneBasePw::DamageF(float Value)
+{
+	if(HP>0)
+	{
+		HP-=Value;
+	}
+	else if (HP<=0)
+	{
+		HP=0;
+		Dead();
+	}
 }
 

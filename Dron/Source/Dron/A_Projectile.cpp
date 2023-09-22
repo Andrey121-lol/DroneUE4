@@ -30,7 +30,7 @@ void AA_Projectile::BeginPlay()
 	Super::BeginPlay();
 	if (Box)
 	{
-		Box->OnComponentHit.AddDynamic(this, &AA_Projectile::OnHit);
+		Box->OnComponentBeginOverlap.AddDynamic(this, &AA_Projectile::OnOverlapBegin);
 	}
 	
 }
@@ -42,21 +42,27 @@ void AA_Projectile::Tick(float DeltaTime)
 
 }
 
-void AA_Projectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-								  FVector NormalImpulse, const FHitResult& Hit)
+void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, 
+	AActor* OtherActor, 
+	UPrimitiveComponent* OtherComp, 
+	int32 OtherBodyIndex, 
+	bool bFromSweep, 
+	const FHitResult& SweepResult)
 {
-	// Проверяем, что OtherComp является экземпляром UBoxComponent
-	ADroneBasePw* Dron = Cast<ADroneBasePw>(OtherActor);
-	if (Dron)
+	// Проверяем, является ли OtherActor экземпляром класса DroneBasePw
+	ADroneBasePw* Drone = Cast<ADroneBasePw>(OtherActor);
+    
+	if (Drone)
 	{
-		
-		UE_LOG(LogTemp, Warning, TEXT("хуяк"));
+		// Выполняем действия, связанные с DroneBasePw
+		// Drone теперь указывает на экземпляр класса DroneBasePw
+		UE_LOG(LogTemp, Warning, TEXT("xxx"));
+		Drone->DamageF(1);
 
-		// Или выполнить другие операции с UBoxComponent
 	}
-	else
+	else if (OtherActor && (OtherActor != this))
 	{
-		// OtherComp не является UBoxComponent, выполните другую обработку
+		// Если OtherActor не является DroneBasePw, выполните другие действия
 	}
+	//Destroy();
 }
-

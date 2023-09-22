@@ -6,10 +6,11 @@
 #include "GameFramework/Pawn.h"
 #include "E_AnimDrone.h"
 #include "A_Projectile.h"
+#include "GameOverOrWin_I.h"
 #include "DroneBasePw.generated.h"
 
 UCLASS()
-class DRON_API ADroneBasePw : public APawn
+class DRON_API ADroneBasePw : public APawn ,public IGameOverOrWin_I
 {
 	GENERATED_BODY()
 
@@ -76,8 +77,6 @@ public:
 	bool CanShoot=true;
 	
 	FTimerHandle MemberTimerHandle;
-	
-
 
 	//func
 
@@ -94,5 +93,7 @@ public:
 	void AttackFPres();
 	void Fire();
 	void AttackFReleas();
+	void Dead();
+	void DamageF(float Value);
 
 };
