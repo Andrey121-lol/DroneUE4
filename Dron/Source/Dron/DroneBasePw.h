@@ -40,6 +40,12 @@ public:
 	// Static mesh component that will represent the drone
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	class UStaticMeshComponent* Mesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* Head;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* Gun;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	class UStaticMeshComponent* Gun2;
 
 	// Spring arm component that will attach the camera to the mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

@@ -5,6 +5,7 @@
 #include "DroneBasePw.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/GameSession.h"
 
 // Sets default values
 AA_Projectile::AA_Projectile()
@@ -51,7 +52,8 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 {
 	// Проверяем, является ли OtherActor экземпляром класса DroneBasePw
 	ADroneBasePw* Drone = Cast<ADroneBasePw>(OtherActor);
-    
+	//ADroneBasePw* Drone = Cast<ADroneBasePw>(OtherActor);
+
 	if (Drone)
 	{
 		// Выполняем действия, связанные с DroneBasePw
