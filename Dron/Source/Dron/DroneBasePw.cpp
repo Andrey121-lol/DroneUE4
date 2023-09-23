@@ -177,7 +177,7 @@ void ADroneBasePw::AttackFPres()
 
 void ADroneBasePw::Fire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Ваше сообщение здесь"));
+	//UE_LOG(LogTemp, Warning, TEXT("Ваше сообщение здесь"));
 	AA_Projectile* SpawnP = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box2->GetComponentTransform());
 	AA_Projectile* SpawnP2 = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box3->GetComponentTransform());
 

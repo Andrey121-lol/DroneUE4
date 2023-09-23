@@ -6,7 +6,9 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/GameSession.h"
+#include "iostream"
 
+using namespace std;
 // Sets default values
 AA_Projectile::AA_Projectile()
 {
@@ -58,7 +60,8 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	{
 		// Выполняем действия, связанные с DroneBasePw
 		// Drone теперь указывает на экземпляр класса DroneBasePw
-		UE_LOG(LogTemp, Warning, TEXT("xxx"));
+		//UE_LOG(LogTemp, Warning, TEXT("xxx"));
+		cout<<"damn";
 		Drone->DamageF(1);
 
 	}
