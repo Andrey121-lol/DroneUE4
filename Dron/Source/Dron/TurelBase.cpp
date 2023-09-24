@@ -1,40 +1,64 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enami_Base.h"
-
+#include "TurelBase.h"
+#include "A_Projectile.h"
+#include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+// Sets default values
+ATurelBase::ATurelBase()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
+	RootComponent = Box;
 
-void AEnami_Base::BeginPlay()
+	BaseTurel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	HeadTurel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
+	GunTurel1 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
+	GunTurel2 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun2"));
+
+	BaseTurel->SetupAttachment(Box);
+	HeadTurel->SetupAttachment(BaseTurel);
+	GunTurel1->SetupAttachment(HeadTurel);
+	GunTurel2->SetupAttachment(HeadTurel);
+
+
+}
+
+// Called when the game starts or when spawned
+void ATurelBase::BeginPlay()
 {
 	Super::BeginPlay();
-	IfDron =false;
-
-	UClass* ClassToFind = AEnami_Base::StaticClass();
+	UClass* ClassToFind = ATurelBase::StaticClass();
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, FoundActors);
-	
-	
+
 	
 }
 
-void AEnami_Base::Tick(float DeltaTime)
+// Called every frame
+void ATurelBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	FindTarget();
 	UpdRotation(DeltaTime);
+
 }
 
-bool AEnami_Base::HaslineOfDight(FVector From, FVector To, TArray<AActor*> ActorsToIgnore)
+
+
+bool ATurelBase::HaslineOfDight(FVector From, FVector To, TArray<AActor*> ActorsToIgnore)
 {
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActors(ActorsToIgnore);
 
-	// Выполняем лучевой трассировки от точки From к точке To.
+		// Выполняем лучевой трассировки от точки From к точке To.
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,     // Результат трассировки.
 		From,          // Начальная точка.
@@ -47,7 +71,7 @@ bool AEnami_Base::HaslineOfDight(FVector From, FVector To, TArray<AActor*> Actor
 	return !bHit;
 }
 
-void AEnami_Base::FindTarget()
+void ATurelBase::FindTarget()
 {
 	float BestDist=SensingRange+1;
 	float CurrentDist=0;
@@ -56,6 +80,7 @@ void AEnami_Base::FindTarget()
 	
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; // Specify object types if needed.
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
 	UClass* ActorClassFilter = nullptr; // Specify actor class filter if needed.
 	TArray<AActor*> ActorsToIgnore; // Specify actors to ignore if needed.
 	ActorsToIgnore.Add(this);
@@ -93,7 +118,7 @@ void AEnami_Base::FindTarget()
 				ActorsToIgnore2.Add(this);
 				ActorsToIgnore2.Add(CurrentTarget);
 				
-				bool result = HaslineOfDight(Head->GetRelativeLocation(),CurrentTarget->GetActorLocation(),ActorsToIgnore2);
+				bool result = HaslineOfDight(HeadTurel->GetComponentLocation(),CurrentTarget->GetActorLocation(),ActorsToIgnore2);
 				if(result)
 				{
 					BestTarget=CurrentTarget;
@@ -101,22 +126,24 @@ void AEnami_Base::FindTarget()
 				}
 			}
 		}
-		Target=BestTarget;
+		
+			Target = BestTarget;
+		
+		
 		
 	}
 	
 	
 }
 
-void AEnami_Base::UpdRotation(float DeltaSeconds)
+void ATurelBase::UpdRotation(float DeltaSeconds)
 {
+	
 	if(Target)
 	{
-		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(Mesh->GetRelativeLocation(), Target->GetActorLocation());
-		FRotator ReinerpRot=UKismetMathLibrary::RInterpTo_Constant(Mesh->GetRelativeRotation(),NewRotation,DeltaSeconds,SpeedRotation);
-		Head->SetWorldRotation(ReinerpRot);
+		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(HeadTurel->GetComponentLocation(), Target->GetActorLocation());
+		FRotator ReinerpRot=UKismetMathLibrary::RInterpTo_Constant(HeadTurel->GetComponentRotation(),NewRotation,DeltaSeconds,SpeedRotation);
+		HeadTurel->SetWorldRotation(ReinerpRot);
 	}
 	
 }
-
-
