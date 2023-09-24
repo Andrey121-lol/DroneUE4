@@ -81,6 +81,7 @@ public:
 	E_AnimDrone AnimDrone;
 
 	bool CanShoot=true;
+	bool IfDron=true;
 	
 	FTimerHandle MemberTimerHandle;
 

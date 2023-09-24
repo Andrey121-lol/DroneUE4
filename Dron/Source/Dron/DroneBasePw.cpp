@@ -65,7 +65,7 @@ void ADroneBasePw::Tick(float DeltaTime)
 
 	
 	
-	if(AnimDrone==E_AnimDrone::Idle)
+	if(AnimDrone==E_AnimDrone::Idle && IfDron)
 	{
 		FVector NewLocation = GetActorLocation();
 		float RunningTime = GetGameTimeSinceCreation();
