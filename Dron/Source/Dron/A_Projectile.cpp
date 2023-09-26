@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/GameSession.h"
 #include "iostream"
+#include "TurelBase.h"
 
 using namespace std;
 // Sets default values
@@ -55,19 +56,27 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	// Проверяем, является ли OtherActor экземпляром класса DroneBasePw
 	ADroneBasePw* Drone = Cast<ADroneBasePw>(OtherActor);
 	//ADroneBasePw* Drone = Cast<ADroneBasePw>(OtherActor);
+	ATurelBase* Turel = Cast<ATurelBase>(OtherActor);
+
 
 	if (Drone)
 	{
 		// Выполняем действия, связанные с DroneBasePw
 		// Drone теперь указывает на экземпляр класса DroneBasePw
 		//UE_LOG(LogTemp, Warning, TEXT("xxx"));
-		cout<<"damn";
+		//cout<<"damn";
 		Drone->DamageF(1);
 
+	}
+
+	else if (Turel)
+	{
+		// Если OtherActor не является DroneBasePw, выполните другие действия
+		Turel->DamageF(1);
 	}
 	else if (OtherActor && (OtherActor != this))
 	{
 		// Если OtherActor не является DroneBasePw, выполните другие действия
 	}
-	//Destroy();
 }
+		

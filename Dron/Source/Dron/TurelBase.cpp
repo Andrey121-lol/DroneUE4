@@ -2,7 +2,7 @@
 
 
 #include "TurelBase.h"
-#include "A_Projectile.h"
+#include "DroneBasePw.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -34,9 +34,18 @@ ATurelBase::ATurelBase()
 void ATurelBase::BeginPlay()
 {
 	Super::BeginPlay();
-	UClass* ClassToFind = ATurelBase::StaticClass();
+	// Убедимся, что PlayerPawn равен nullptr перед началом поиска.
+	PlayerPawn = nullptr;
+	
+	UClass* ClassToFind = ADroneBasePw::StaticClass(); // Замените на класс игрока.
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, FoundActors);
+	if (FoundActors.Num() > 0)
+	{
+		// Ваш код ищет только одного игрока, если найдено несколько, то выберется первый.
+		PlayerPawn = FoundActors[0];
+	}
+
 
 	
 }
@@ -47,6 +56,7 @@ void ATurelBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	FindTarget();
 	UpdRotation(DeltaTime);
+	UpdFire();
 
 }
 
@@ -73,67 +83,40 @@ bool ATurelBase::HaslineOfDight(FVector From, FVector To, TArray<AActor*> Actors
 
 void ATurelBase::FindTarget()
 {
-	float BestDist=SensingRange+1;
-	float CurrentDist=0;
-	AActor* BestTarget = nullptr;
-	AActor* CurrentTarget=nullptr;
-	
+	float CurrentDist = 0;
+	AActor* CurrentTarget = nullptr;
 
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes; // Specify object types if needed.
-	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
-	UClass* ActorClassFilter = nullptr; // Specify actor class filter if needed.
-	TArray<AActor*> ActorsToIgnore; // Specify actors to ignore if needed.
-	ActorsToIgnore.Add(this);
-	for (int i =0;i<FoundActors.Num();i++)
-	{
-		ActorsToIgnore.Add(FoundActors[i]);
-
-	}
-	
 	TArray<AActor*> OutActors;
-	
-	bool bOverlap = UKismetSystemLibrary::SphereOverlapActors(
-	   this, // World context object.
-	   GetActorLocation(), // Sphere position.
-	   SensingRange, // Sphere radius.
-	   ObjectTypes, // Object types to consider (can be empty).
-	   ActorClassFilter, // Actor class filter (can be nullptr).
-	   ActorsToIgnore, // Actors to ignore (can be empty).
-	   OutActors // Array to store overlapping actors.
-   );
+
+	// Изменим метод сферического поиска только на поиск всех актеров в указанном радиусе.
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADroneBasePw::StaticClass(), OutActors);
 
 	if (OutActors.Num() > 0)
 	{
-		AActor* FirstOverlappingActor = OutActors[0];
-		
-		for (int i = 0;i<OutActors.Num();i++)
+		for (AActor* Actor : OutActors)
 		{
-			FString ActorName = OutActors[i]->GetName();
-			UE_LOG(LogTemp, Warning, TEXT("Overlapping Actor's Name: %s"), *ActorName);
-			CurrentTarget = OutActors[i];
+			CurrentTarget = Actor;
 			CurrentDist = CurrentTarget->GetDistanceTo(this);
-			if(CurrentDist<BestDist || !BestTarget)
+
+			if (CurrentDist <= SensingRange)
 			{
 				TArray<AActor*> ActorsToIgnore2;
 				ActorsToIgnore2.Add(this);
 				ActorsToIgnore2.Add(CurrentTarget);
-				
-				bool result = HaslineOfDight(HeadTurel->GetComponentLocation(),CurrentTarget->GetActorLocation(),ActorsToIgnore2);
-				if(result)
+
+				bool result = HaslineOfDight(HeadTurel->GetComponentLocation(), CurrentTarget->GetActorLocation(), ActorsToIgnore2);
+
+				if (result)
 				{
-					BestTarget=CurrentTarget;
-					BestDist=CurrentDist;
+					Target = CurrentTarget;
+					return; // Мы нашли цель в радиусе, поэтому больше не ищем.
 				}
 			}
 		}
-		
-			Target = BestTarget;
-		
-		
-		
 	}
-	
-	
+
+	// Если не нашли игрока в радиусе, сбрасываем Target.
+	Target = nullptr;
 }
 
 void ATurelBase::UpdRotation(float DeltaSeconds)
@@ -146,4 +129,89 @@ void ATurelBase::UpdRotation(float DeltaSeconds)
 		HeadTurel->SetWorldRotation(ReinerpRot);
 	}
 	
+}
+
+void ATurelBase::DamageF(float Value)
+{
+	if(HP>0)
+	{
+		HP-=Value;
+	}
+	else if (HP<=0)
+	{
+		HP=0;
+		Dead();
+	}
+}
+
+void ATurelBase::Dead()
+{
+	
+}
+
+void ATurelBase::UpdFire()
+{
+	if (Target)
+	{
+		FVector UnitDirectionVector =GetUnitDirectionVector(HeadTurel->GetComponentLocation(),Target->GetActorLocation());
+		FVector ForwardVectorHead=HeadTurel->GetForwardVector();
+		DotProductValue = GetDotProductTo(UnitDirectionVector,ForwardVectorHead);
+		if (DotProductValue<0.99)
+		{
+			AttackFPres(GunTurel1);
+			AttackFPres(GunTurel2);
+		}
+	}
+	else
+	{
+		AttackFReleas();
+	}
+	
+}
+
+FVector ATurelBase::GetUnitDirectionVector(FVector StartVector, FVector EndVector)
+{
+	// Получаем направление от StartVector к EndVector
+	FVector Direction = (EndVector - StartVector).GetSafeNormal();
+
+	return Direction;
+}
+
+float ATurelBase::GetDotProductTo(FVector VectorA, FVector VectorB)
+{
+	// Вычислить dot product (скалярное произведение) между двумя векторами
+	float DotProduct = FVector::DotProduct(VectorA, VectorB);
+
+	return DotProduct;
+}
+
+void ATurelBase::Fire(class UStaticMeshComponent* Gun)
+{
+	AA_Projectile* SpawnP = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Gun->GetSocketTransform("Gun"));
+}
+
+void ATurelBase::AttackFPres(class UStaticMeshComponent* Gun)
+{
+	if (CanShoot)
+	{
+		FTimerDelegate TimerCallback;
+		TimerCallback.BindLambda([this, Gun]() {
+			Fire(Gun);
+		});
+
+		if (Gun == GunTurel1)
+		{
+			GetWorldTimerManager().SetTimer(MemberTimerHandle1, TimerCallback, 0.3f, true, 0.3f);
+		}
+		else if (Gun == GunTurel2)
+		{
+			GetWorldTimerManager().SetTimer(MemberTimerHandle2, TimerCallback, 0.3f, true, 0.3f);
+		}
+	}
+}
+
+void ATurelBase::AttackFReleas()
+{
+	GetWorldTimerManager().ClearTimer(MemberTimerHandle1);
+	GetWorldTimerManager().ClearTimer(MemberTimerHandle2);
 }

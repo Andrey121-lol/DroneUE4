@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "A_Projectile.h"
 #include "TurelBase.generated.h"
 
 UCLASS()
@@ -38,15 +39,37 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	FName BaseTurelParentSocket;
 
-	float SensingRange = 1500;
+	float SensingRange = 5000;
 	float SpeedRotation = 50;
+	float HP = 100;
+	float TimeOfLastFire = 0;
+	float RateOfFire = 3;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "var")
 	AActor* Target ;
 	TArray<AActor*> FoundActors;
+	AActor* PlayerPawn = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "var")
+	float DotProductValue=0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Var")
+	TSubclassOf<AA_Projectile> ProjectileClass;
+	bool CanShoot=true;
+	FTimerHandle MemberTimerHandle1;
+	FTimerHandle MemberTimerHandle2;
+
 
 	
 	bool HaslineOfDight(FVector From ,FVector To,TArray<AActor*> ActorsToIgnore);
 	void FindTarget();
 	void UpdRotation(float DeltaSeconds);
+	void DamageF(float Value);
+	void Dead();
+	void UpdFire();
+	FVector GetUnitDirectionVector(FVector StartVector, FVector EndVector);
+	float GetDotProductTo(FVector VectorA, FVector VectorB);
+	void Fire(class UStaticMeshComponent* Gun);
+	void AttackFPres(class UStaticMeshComponent* Gun);
+	void AttackFReleas();
+
+
 
 };
