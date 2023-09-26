@@ -22,20 +22,13 @@ ADroneBasePw::ADroneBasePw()
 	Box3 = CreateDefaultSubobject<UBoxComponent>(TEXT("Box3"));
 	RootComponent = Box;
 	
-
 	// Create and attach the static mesh component
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Head"));
-	Gun = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun"));
-	Gun2 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun2"));
-
+	
 	Mesh->SetupAttachment(Box);
 	Box2->SetupAttachment(Mesh);
 	Box3->SetupAttachment(Mesh);
-	Head->SetupAttachment(Mesh);
-	Gun->SetupAttachment(Head);
-	Gun2->SetupAttachment(Head);
-
+	
 	// Create and attach the spring arm component
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(Mesh);

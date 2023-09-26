@@ -156,13 +156,13 @@ void ATurelBase::UpdFire()
 		FVector UnitDirectionVector =GetUnitDirectionVector(HeadTurel->GetComponentLocation(),Target->GetActorLocation());
 		FVector ForwardVectorHead=HeadTurel->GetForwardVector();
 		DotProductValue = GetDotProductTo(UnitDirectionVector,ForwardVectorHead);
-		if (DotProductValue<0.99)
+		if (DotProductValue<0.99 && Target)
 		{
 			AttackFPres(GunTurel1);
 			AttackFPres(GunTurel2);
 		}
 	}
-	else
+	else 
 	{
 		AttackFReleas();
 	}
