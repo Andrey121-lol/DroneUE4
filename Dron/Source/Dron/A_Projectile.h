@@ -42,5 +42,11 @@ public:
 	bool bFromSweep, 
 	const FHitResult& SweepResult);
 
+	void DestroyProjectile();
+	void SetMaterialF(AActor*ActorValue);
+	FTimerHandle TimerHandle_Material;
+	FTimerHandle TimerHandle_Destroy;
+
+
 
 };

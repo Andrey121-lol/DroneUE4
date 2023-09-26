@@ -5,8 +5,6 @@
 #include "DroneBasePw.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "GameFramework/GameSession.h"
-#include "iostream"
 #include "TurelBase.h"
 
 using namespace std;
@@ -36,8 +34,29 @@ void AA_Projectile::BeginPlay()
 	{
 		Box->OnComponentBeginOverlap.AddDynamic(this, &AA_Projectile::OnOverlapBegin);
 	}
+	GetWorldTimerManager().SetTimer(TimerHandle_Destroy, this, &AA_Projectile::DestroyProjectile, 5.0f, false);
+
 	
 }
+
+void AA_Projectile::DestroyProjectile()
+{
+	Destroy();
+}
+
+void AA_Projectile::SetMaterialF(AActor*ActorValue)
+{
+	ADroneBasePw* Drone = Cast<ADroneBasePw>(ActorValue);
+
+	if (Drone)
+	{
+		if(!Drone->IsShield)
+		{
+			Drone->Mesh->SetMaterial(0,Drone->MainMaterial);
+		}
+	}
+}
+
 
 // Called every frame
 void AA_Projectile::Tick(float DeltaTime)
@@ -65,7 +84,16 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 		// Drone теперь указывает на экземпляр класса DroneBasePw
 		//UE_LOG(LogTemp, Warning, TEXT("xxx"));
 		//cout<<"damn";
-		Drone->DamageF(1);
+		if(!Drone->IsShield)
+		{
+			Drone->DamageF(1);
+			Drone->Mesh->SetMaterial(0,Drone->DamageMaterial);
+
+			FTimerDelegate TimerCallback;
+			TimerCallback.BindLambda([this,Drone]{SetMaterialF(Drone);});
+			GetWorldTimerManager().SetTimer(TimerHandle_Material, TimerCallback, 0.2f, false);
+
+		}
 
 	}
 
@@ -78,5 +106,6 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	{
 		// Если OtherActor не является DroneBasePw, выполните другие действия
 	}
+	DestroyProjectile();
 }
 		

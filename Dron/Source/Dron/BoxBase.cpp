@@ -31,6 +31,7 @@ void ABoxBase::BeginPlay()
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	PlayerPawn = PlayerController->GetPawn();
 
+    	
 }
 
 // Called every frame
@@ -49,8 +50,15 @@ void ABoxBase::AddResourcesToPlayer(float Value)
 void ABoxBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AddResourcesToPlayer(ValuesResurs);
-	Destroy();
+	ADroneBasePw* DroneActor = Cast<ADroneBasePw>(OtherActor);
+	if (DroneActor)
+	{
+		// Если успешно привели к типу ADroneBase, можно вызвать функцию AddResourcesToPlayer
+		AddResourcesToPlayer(ValuesResurs);
+
+		// Уничтожаем актер
+		Destroy();
+	}
 }
 
 

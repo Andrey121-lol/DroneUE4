@@ -63,21 +63,39 @@ public:
 	float FullHP=100;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
-	float HP=100;
+	float HP=FullHP;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
-	int Amo;
-
+	float FullAmo=200;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
-	int FullAmo=200;
+	float Amo=FullAmo;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
+	float FullShield=200;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Var")
+	float Shield=FullShield;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Var")
 	E_AnimDrone AnimDrone;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* MainMaterial;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* ShieldMaterial;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Materials")
+	UMaterialInterface* DamageMaterial;
+
 	bool CanShoot=true;
+	bool CanShield=true;
+	bool IsShield=false;
 	bool IfDron=true;
+	float one=1.0;
 	
 	FTimerHandle MemberTimerHandle;
+	FTimerHandle MemberTimerHandle2;
 
 	//func
 
@@ -95,6 +113,12 @@ public:
 	void Fire();
 	void AttackFReleas();
 	void Dead();
+	void BlockFPres();
+	void BlockFReleas();
 	void DamageF(float Value);
+	void AddHP(float Value);
+	void AddAmo(float Value);
+	void AddShield(float Value);
+	void RemoveShield(float Value);
 
 };

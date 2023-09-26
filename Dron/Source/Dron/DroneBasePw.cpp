@@ -9,6 +9,30 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
+template <typename T>
+T TAddResurs(T CurrentValue, T MaxValue, T IncrementAmount)
+{
+	CurrentValue += IncrementAmount;
+	if (CurrentValue >= MaxValue)
+	{
+		CurrentValue = MaxValue;
+	}
+	return CurrentValue;
+}
+
+template <typename T>
+T TakeAwayResurs(T CurrentValue, T DecrementAmount,bool&BoolV)
+{
+	CurrentValue -= DecrementAmount;
+	if (CurrentValue < 0)
+	{
+		CurrentValue = 0;
+		BoolV=false;
+	}
+	
+	return CurrentValue;
+}
+
 
 // Sets default values
 ADroneBasePw::ADroneBasePw()
@@ -40,7 +64,8 @@ ADroneBasePw::ADroneBasePw()
 	// Create and attach the floating pawn movement component
 	FloatingPawnMovement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("FloatingPawnMovement"));
 	FloatingPawnMovement->UpdatedComponent = RootComponent;
-	
+	Mesh->SetMaterial(0,MainMaterial);
+
 
 }
 
@@ -48,7 +73,8 @@ ADroneBasePw::ADroneBasePw()
 void ADroneBasePw::BeginPlay()
 {
 	Super::BeginPlay();
-	float Angle = 0;
+	//float Angle = 0;
+	Mesh->SetMaterial(0,MainMaterial);
 }
 
 // Called every frame
@@ -104,6 +130,8 @@ void ADroneBasePw::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction("Attack",IE_Pressed,this,&ADroneBasePw::AttackFPres);
 	PlayerInputComponent->BindAction("Attack",IE_Released,this,&ADroneBasePw::AttackFReleas);
+	PlayerInputComponent->BindAction("Block",IE_Pressed,this,&ADroneBasePw::BlockFPres);
+	PlayerInputComponent->BindAction("Block",IE_Released,this,&ADroneBasePw::BlockFReleas);
 	
 }
 
@@ -161,10 +189,11 @@ void ADroneBasePw::LookRightF(float Value)
 
 void ADroneBasePw::AttackFPres()
 {
+	
 	if (CanShoot)
 	{
 		GetWorldTimerManager().SetTimer(MemberTimerHandle, this, &ADroneBasePw::Fire, 0.1f, true, 0.1f);
-
+		
 	}
 }
 
@@ -173,6 +202,13 @@ void ADroneBasePw::Fire()
 	//UE_LOG(LogTemp, Warning, TEXT("Ваше сообщение здесь"));
 	AA_Projectile* SpawnP = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box2->GetComponentTransform());
 	AA_Projectile* SpawnP2 = GetWorld()->SpawnActor<AA_Projectile>(ProjectileClass,Box3->GetComponentTransform());
+	Amo=TakeAwayResurs(Amo,one,CanShoot);
+	Amo=TakeAwayResurs(Amo,one,CanShoot);
+	if(!CanShoot)
+	{
+		AttackFReleas();
+	}
+
 
 }
 
@@ -193,6 +229,34 @@ void ADroneBasePw::Dead()
 
 }
 
+void ADroneBasePw::BlockFPres()
+{
+	if (CanShield)
+	{
+		IsShield=true;
+		FTimerDelegate TimerCallBack;
+		TimerCallBack.BindLambda([this]()
+		{
+			RemoveShield(10);
+		});
+	
+		GetWorldTimerManager().SetTimer(MemberTimerHandle2, TimerCallBack, 0.1f, true, 0.1f);
+
+		Mesh->SetMaterial(0,ShieldMaterial);
+		
+		
+	}
+}
+
+void ADroneBasePw::BlockFReleas()
+{
+	IsShield=false;
+	Mesh->SetMaterial(0,MainMaterial);
+	GetWorldTimerManager().ClearTimer(MemberTimerHandle2);
+
+
+}
+
 void ADroneBasePw::DamageF(float Value)
 {
 	if(HP>0)
@@ -204,5 +268,33 @@ void ADroneBasePw::DamageF(float Value)
 		HP=0;
 		Dead();
 	}
+}
+
+void ADroneBasePw::AddHP(float Value)
+{
+	HP=TAddResurs(HP,FullHP,Value);
+	
+}
+
+void ADroneBasePw::AddAmo(float Value)
+{
+	Amo=TAddResurs(Amo,FullAmo,Value);
+
+}
+
+void ADroneBasePw::AddShield(float Value)
+{
+	Shield=TAddResurs(Shield,FullShield,Value);
+
+}
+
+void ADroneBasePw::RemoveShield(float Value)
+{
+	Shield=TakeAwayResurs(Shield,Value,CanShield);
+	if (!CanShield)
+	{
+		BlockFReleas();
+	}
+	
 }
 

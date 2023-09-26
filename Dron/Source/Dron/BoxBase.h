@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DroneBasePw.h"
 #include "GameFramework/Actor.h"
 #include "BoxBase.generated.h"
 
