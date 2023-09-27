@@ -100,7 +100,7 @@ void AA_Projectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
 	else if (Turel)
 	{
 		// Если OtherActor не является DroneBasePw, выполните другие действия
-		Turel->DamageF(1);
+		Turel->DamageF(10);
 	}
 	else if (OtherActor && (OtherActor != this))
 	{

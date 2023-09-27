@@ -120,5 +120,6 @@ public:
 	void AddAmo(float Value);
 	void AddShield(float Value);
 	void RemoveShield(float Value);
+	void Win();
 
 };

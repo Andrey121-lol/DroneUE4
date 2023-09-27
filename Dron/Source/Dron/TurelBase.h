@@ -41,7 +41,10 @@ public:
 
 	float SensingRange = 5000;
 	float SpeedRotation = 50;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "var")
 	float HP = 100;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "var")
+	float FullHP = 100;
 	float TimeOfLastFire = 0;
 	float RateOfFire = 3;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "var")
@@ -53,6 +56,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Var")
 	TSubclassOf<AA_Projectile> ProjectileClass;
 	bool CanShoot=true;
+	bool IsLive=true;
 	FTimerHandle MemberTimerHandle1;
 	FTimerHandle MemberTimerHandle2;
 

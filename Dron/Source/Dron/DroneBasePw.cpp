@@ -3,11 +3,13 @@
 
 #include "DroneBasePw.h"
 #include "GameOverOrWin_I.h"
+#include "TurelBase.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Kismet/GameplayStatics.h"
 
 template <typename T>
 T TAddResurs(T CurrentValue, T MaxValue, T IncrementAmount)
@@ -220,6 +222,22 @@ void ADroneBasePw::AttackFReleas()
 
 void ADroneBasePw::Dead()
 {
+	TArray<AActor*> FoundActors;
+
+	// Заполняем массив акторами класса AActor
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATurelBase::StaticClass(), FoundActors);
+
+	// Теперь в массиве FoundActors содержатся все акторы класса ATurelBase в текущем мире
+	// Вы можете выполнить дополнительные операции с этими акторами
+	for (AActor* Actor : FoundActors)
+	{
+		ATurelBase* TurelBase = Cast<ATurelBase>(Actor);
+		if (TurelBase)
+		{
+			TurelBase->IsLive=false;
+			TurelBase->AttackFReleas();
+		}
+	}
 	IGameOverOrWin_I* InterfaceImplementer = Cast<IGameOverOrWin_I>(this);
 
 	if (InterfaceImplementer)
@@ -294,6 +312,33 @@ void ADroneBasePw::RemoveShield(float Value)
 	if (!CanShield)
 	{
 		BlockFReleas();
+	}
+	
+}
+
+void ADroneBasePw::Win()
+{
+	TArray<AActor*> FoundActors;
+
+	// Заполняем массив акторами класса AActor
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATurelBase::StaticClass(), FoundActors);
+
+	// Теперь в массиве FoundActors содержатся все акторы класса ATurelBase в текущем мире
+	// Вы можете выполнить дополнительные операции с этими акторами
+	for (AActor* Actor : FoundActors)
+	{
+		ATurelBase* TurelBase = Cast<ATurelBase>(Actor);
+		if (TurelBase)
+		{
+			TurelBase->IsLive=false;
+			TurelBase->AttackFReleas();
+		}
+	}
+	IGameOverOrWin_I* InterfaceImplementer = Cast<IGameOverOrWin_I>(this);
+	
+	if (InterfaceImplementer)
+	{
+		InterfaceImplementer->Execute_GameWinF(this);
 	}
 	
 }

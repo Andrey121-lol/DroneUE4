@@ -53,9 +53,12 @@ void ATurelBase::BeginPlay()
 void ATurelBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FindTarget();
-	UpdRotation(DeltaTime);
-	UpdFire();
+	if(IsLive)
+	{
+		FindTarget();
+		UpdRotation(DeltaTime);
+		UpdFire();
+	}
 
 }
 
@@ -82,7 +85,9 @@ bool ATurelBase::HaslineOfDight(FVector From, FVector To, TArray<AActor*> Actors
 
 void ATurelBase::FindTarget()
 {
+	float BestDist = SensingRange + 1;
 	float CurrentDist = 0;
+	AActor* BestTarget = nullptr;
 	AActor* CurrentTarget = nullptr;
 
 	TArray<AActor*> OutActors;
@@ -107,15 +112,18 @@ void ATurelBase::FindTarget()
 
 				if (result)
 				{
-					Target = CurrentTarget;
-					return; // Мы нашли цель в радиусе, поэтому больше не ищем.
+					if (CurrentDist < BestDist || !BestTarget)
+					{
+						BestTarget = CurrentTarget;
+						BestDist = CurrentDist;
+					}
 				}
 			}
 		}
 	}
 
 	// Если не нашли игрока в радиусе, сбрасываем Target.
-	Target = nullptr;
+	Target = BestTarget;
 }
 
 void ATurelBase::UpdRotation(float DeltaSeconds)
@@ -145,7 +153,11 @@ void ATurelBase::DamageF(float Value)
 
 void ATurelBase::Dead()
 {
-	
+	IsLive=false;
+	AttackFReleas();
+	HeadTurel->DestroyComponent();
+	GunTurel1->DestroyComponent();
+	GunTurel2->DestroyComponent();
 }
 
 void ATurelBase::UpdFire()
